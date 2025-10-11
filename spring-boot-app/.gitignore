@@ -1,0 +1,9 @@
+# Ignore Maven build output
+target/
+
+# Ignore logs, IDE configs, and OS files
+*.log
+.idea/
+.vscode/
+*.iml
+.DS_Store
