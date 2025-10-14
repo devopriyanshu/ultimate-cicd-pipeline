@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'maven:3.9.4-eclipse-temurin-17'  // Includes JDK 17 + Maven
+            image 'abhishekf5/maven-abhishek-docker-agent:v1'  // Includes JDK 17 + Maven
             args '-v /var/run/docker.sock:/var/run/docker.sock'  // To build Docker images inside container
         }
     }
