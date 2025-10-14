@@ -1,14 +1,14 @@
 pipeline {
-    agent any
-
-    tools {
-        jdk 'jdk17'
-        maven 'Maven'
+    agent {
+        docker {
+            image 'maven:3.9.4-eclipse-temurin-17'  // Includes JDK 17 + Maven
+            args '-v /var/run/docker.sock:/var/run/docker.sock'  // To build Docker images inside container
+        }
     }
 
     environment {
         SONAR_URL = 'http://host.docker.internal:9000'
-        SONAR_TOKEN = credentials('sonarqube') // Store token in Jenkins credentials
+        SONAR_TOKEN = credentials('sonarqube') // Jenkins credentials (Secret Text)
         DOCKER_HUB_REPO = 'devopriyanshu/spring-app'
     }
 
@@ -39,10 +39,15 @@ pipeline {
         }
 
         stage('Docker Build & Push') {
+            environment {
+                DOCKER_CREDENTIALS = credentials('docker-cred') // DockerHub username/password or token
+            }
             steps {
                 sh '''
+                echo "$DOCKER_CREDENTIALS_PSW" | docker login -u "$DOCKER_CREDENTIALS_USR" --password-stdin
                 docker build -t $DOCKER_HUB_REPO:$BUILD_NUMBER .
                 docker push $DOCKER_HUB_REPO:$BUILD_NUMBER
+                docker logout
                 '''
             }
         }
