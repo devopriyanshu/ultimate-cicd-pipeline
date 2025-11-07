@@ -34,6 +34,29 @@ pipeline {
                 '''
             }
         }
+        stage('Static Code Analysis (SonarQube)') {
+            agent {
+                docker {
+                    image 'maven:3.9.6-eclipse-temurin-17'
+                    args '-v $HOME/.m2:/root/.m2'
+                }
+            }
+            environment {
+                SONAR_URL = "http://<your-sonarqube-server>:9000"
+            }
+            steps {
+                withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+                    sh '''
+                        cd spring-boot-app
+                        mvn sonar:sonar \
+                          -Dsonar.projectKey=spring-app \
+                          -Dsonar.host.url=${SONAR_URL} \
+                          -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
+                }
+            }
+        }
+
 
         stage('Build Docker Image') {
             steps {
